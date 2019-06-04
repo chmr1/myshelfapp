@@ -11,6 +11,13 @@ import {
   ButtonText,
 } from './styles';
 
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from 'react-native-popup-menu';
+
 export default class Main extends Component {
 
     static navigationOptions = {
@@ -19,11 +26,13 @@ export default class Main extends Component {
 
     state = {
       data: [],
+      books: [],
+      shelf: ''
     };
 
     componentDidMount() {
       const { navigation } = this.props;
-      const shelf = navigation.getParam('shelf', 'NO-ID');
+      shelf = navigation.getParam('shelf', 'NO-ID');
       this.loadBooks(shelf);
     };
 
@@ -33,18 +42,27 @@ export default class Main extends Component {
       this.setState({ data });
     };
 
-    handleAddBookPress = () => {
-      this.props.navigation.navigate('BookAdd');
+    handleBookListPress = () => {
+      this.props.navigation.navigate('BookIndex', { shelf: shelf, books: [ 10, 12, 18, 4, 5, 9 ] });
     };
 
-    handleAddBookListPress = () => {
-      this.props.navigation.navigate('BookIndex');
+    handleDeleteBookShelfPress = async (book) => {
+      await api.delete(`/shelves/${shelf}`, { books: book.id });
+      this.loadBooks(shelf);
     };
 
     renderItem = ({ item }) => (
       <BookContainer>
         <BookTitle>{item.title}</BookTitle>
         <BookDescription>{item.author}</BookDescription>
+        <Menu>
+          <MenuTrigger text='Select action' />
+          <MenuOptions>
+            <MenuOption onSelect={() => this.handleBookListPress() } ><Text style={{color: 'green'}}>Livraria</Text></MenuOption>
+            <MenuOption><Text>--------------------------------------------</Text></MenuOption>
+            <MenuOption onSelect={() => this.handleDeleteBookShelfPress(item) } ><Text style={{color: 'red'}}>Remover da Estante</Text></MenuOption>
+          </MenuOptions>
+        </Menu>
       </BookContainer>
     );
 

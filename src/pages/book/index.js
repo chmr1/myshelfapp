@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { Icon, Divider } from 'react-native-elements';
+import { Text, FlatList, StyleSheet } from 'react-native';
 
 import api from '../../services/api';
 
@@ -26,9 +25,14 @@ export default class BookIndex extends Component {
 
     state = {
       data: [],
+      books: [],
+      shelf: ''
     };
 
     componentDidMount() {
+      const { navigation } = this.props;
+      books = navigation.getParam('books', []);
+      shelf = navigation.getParam('shelf', '');
       this.loadBooks();
     };
 
@@ -42,25 +46,28 @@ export default class BookIndex extends Component {
       this.props.navigation.navigate('BookIndex');
     };
 
-    handleAddBookShelfPress = () => {
-      alert(`Save`);
-      //this.props.navigation.navigate('Main', { shelf: 3 });
+    handleAddBookShelfPress = async (book) => {
+      books.push(book.id);
+      await api.patch(`/shelves/${shelf}`, { books: books });
+      this.props.navigation.navigate('Main', { shelf: shelf });
     };
 
     handleAddBookPress = () => {
       this.props.navigation.navigate('BookAdd');
     };
 
-    handleEditBookPress = () => {
-      this.props.navigation.navigate('BookUpdate');
+    handleEditBookPress = (book) => {
+      //this.props.navigation.navigate('BookUpdate');
     };
 
-    handleDetailPress = () => {
-      this.props.navigation.navigate('BookDetail');
+    handleDetailPress = (book) => {
+      //this.props.navigation.navigate('BookDetail');
     };
 
-    handleDeleteBookPress = () => {
-      alert(`Delete`);
+    handleDeleteBookPress = async (book) => {
+      const response = await api.delete(`/books/${book.id}`);
+      alert(response.data.message);
+      this.loadBooks();
     };
 
     renderItem = ({ item }) => (
@@ -70,10 +77,11 @@ export default class BookIndex extends Component {
         <Menu>
           <MenuTrigger text='Select action' />
           <MenuOptions>
-            <MenuOption onSelect={() => this.handleAddBookShelfPress() } ><Text style={{color: 'blue'}}>Adicionar a Estante</Text></MenuOption>
+            <MenuOption onSelect={() => this.handleAddBookShelfPress(item) } ><Text style={{color: 'blue'}}>Adicionar a Estante</Text></MenuOption>
             <MenuOption onSelect={() => this.handleAddBookPress() } ><Text style={{color: 'green'}}>Adicionar Novo Livro</Text></MenuOption>
-            <MenuOption onSelect={() => this.handleEditBookPress() } ><Text style={{color: 'green'}}>Alterar Livro</Text></MenuOption>
-            <MenuOption onSelect={() => this.handleDeleteBookPress() } ><Text style={{color: 'red'}}>Excluir</Text></MenuOption>
+            <MenuOption onSelect={() => this.handleEditBookPress(item) } ><Text style={{color: 'green'}}>Alterar Livro</Text></MenuOption>
+            <MenuOption><Text>--------------------------------------------</Text></MenuOption>
+            <MenuOption onSelect={() => this.handleDeleteBookPress(item) } ><Text style={{color: 'red'}}>Excluir</Text></MenuOption>
           </MenuOptions>
         </Menu>
       </BookContainer>

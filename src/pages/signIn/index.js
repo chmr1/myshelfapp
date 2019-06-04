@@ -60,7 +60,7 @@ export default class SignIn extends Component {
         const resetAction = StackActions.reset({
           index: 0,
           actions: [
-            NavigationActions.navigate({ routeName: 'BookAdd', params: { token: response.data.token, shelf: 3 } }),
+            NavigationActions.navigate({ routeName: 'Main', params: { token: response.data.token, shelf: 8 } }),
           ],
         });
 
