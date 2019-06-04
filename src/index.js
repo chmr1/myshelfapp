@@ -2,6 +2,14 @@ import React from 'react';
 import Routes from './routes';
 import './config/StatusBarConfig';
 
-const App = () => <Routes />;
+import { MenuProvider } from 'react-native-popup-menu';
+
+//const App = () => <Routes />;
+
+export const App = () => (
+    <MenuProvider>
+        <Routes />
+    </MenuProvider>
+);
 
 export default App;
