@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { Text, FlatList, StyleSheet, AsyncStorage } from 'react-native';
 
 import api from '../../services/api';
+
 import {
   ContainerIndex,
   BookContainer,
   BookTitle,
-  BookDescription,
-  Button,
-  ButtonText,
+  BookDescription
 } from './styles';
 
 import {
@@ -25,25 +24,30 @@ export default class Main extends Component {
     };
 
     state = {
+      contador: 0,
       data: [],
-      books: [],
-      shelf: ''
+      books: []
     };
 
     componentDidMount() {
-      const { navigation } = this.props;
-      shelf = navigation.getParam('shelf', 'NO-ID');
-      this.loadBooks(shelf);
+      this.loadUser();
     };
 
-    loadBooks = async (shelf) => {      
+    loadUser = async () => {
+      const userToken = JSON.parse(await AsyncStorage.getItem('@MyShelfAppAPI:userToken'));
+      this.loadBooks(userToken.data.shelves.id);
+    }
+
+    loadBooks = async (shelf) => {
       const response = await api.get(`/shelves/${shelf}`);
       const { data } = response.data;
       this.setState({ data });
+
+      await AsyncStorage.setItem('@MyShelfAppAPI:books', JSON.stringify(data));
     };
 
     handleBookListPress = () => {
-      this.props.navigation.navigate('BookIndex', { shelf: shelf, books: [ 10, 12, 18, 4, 5, 9 ] });
+      this.props.navigation.navigate('BookIndex');
     };
 
     handleDeleteBookShelfPress = async (book) => {

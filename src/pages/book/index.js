@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Text, FlatList, StyleSheet } from 'react-native';
+import { Text, FlatList, StyleSheet, AsyncStorage } from 'react-native';
+import { StackActions, NavigationActions } from 'react-navigation';
+import PropTypes from 'prop-types';
 
 import api from '../../services/api';
 
@@ -23,20 +25,33 @@ export default class BookIndex extends Component {
       title: 'Livraria'
     };
 
+    static propTypes = {
+      navigation: PropTypes.shape({
+        navigate: PropTypes.func,
+        dispatch: PropTypes.func,
+        goBack: PropTypes.func,
+      }).isRequired,
+    };
+
     state = {
       data: [],
       books: [],
-      shelf: ''
+      shelf: 0
     };
 
     componentDidMount() {
-      const { navigation } = this.props;
-      books = navigation.getParam('books', []);
-      shelf = navigation.getParam('shelf', '');
-      this.loadBooks();
+      this.loadBooks()
     };
 
     loadBooks = async () => {
+      const userToken = JSON.parse(await AsyncStorage.getItem('@MyShelfAppAPI:userToken'));
+      this.state.shelf = userToken.data.shelves.id;
+
+      const shelfBooks = JSON.parse(await AsyncStorage.getItem('@MyShelfAppAPI:books'));
+      shelfBooks.books.map((book) => (
+        this.state.books.push(book.id)
+      ));
+
       const response = await api.get('/books');
       const { data } = response.data;
       this.setState({ data });
@@ -47,9 +62,9 @@ export default class BookIndex extends Component {
     };
 
     handleAddBookShelfPress = async (book) => {
-      books.push(book.id);
-      await api.patch(`/shelves/${shelf}`, { books: books });
-      this.props.navigation.navigate('Main', { shelf: shelf });
+      this.state.books.push(book.id);
+      await api.patch(`/shelves/${this.state.shelf}`, { books: this.state.books });
+      this.goToMain();
     };
 
     handleAddBookPress = () => {
@@ -69,6 +84,18 @@ export default class BookIndex extends Component {
       alert(response.data.message);
       this.loadBooks();
     };
+
+    goToMain = () => {
+      const resetAction = StackActions.reset({
+        index: 0,
+        actions: [
+          NavigationActions.navigate({ routeName: 'Main' }),
+        ],
+      });
+
+      this.props.navigation.dispatch(resetAction);
+    }
+      
 
     renderItem = ({ item }) => (
       <BookContainer>

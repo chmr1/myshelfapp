@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { StatusBar } from 'react-native';
+import { StatusBar, AsyncStorage } from 'react-native';
 import { StackActions, NavigationActions } from 'react-navigation';
 
 import api from '../../services/api';
@@ -51,23 +51,22 @@ export default class SignIn extends Component {
     if (this.state.email.length === 0 || this.state.password.length === 0) {
       this.setState({ error: 'Preencha usuário e senha para continuar!' }, () => false);
     } else {
-      try {
-        const response = await api.post('/sessions', {
-          email: this.state.email,
-          password: this.state.password,
-        });
-
+      await api.post('/sessions', {
+        email: this.state.email,
+        password: this.state.password,
+      }).then((response) => {
+        AsyncStorage.setItem('@MyShelfAppAPI:userToken', JSON.stringify(response.data));
         const resetAction = StackActions.reset({
           index: 0,
           actions: [
-            NavigationActions.navigate({ routeName: 'Main', params: { token: response.data.token, shelf: 8 } }),
+            NavigationActions.navigate({ routeName: 'Main' }),
           ],
         });
 
         this.props.navigation.dispatch(resetAction);
-      } catch (_err) {
-        this.setState({ error: 'Houve um problema com o login, verifique suas credenciais!' });
-      }
+      }).catch((response) => {
+        this.setState({ error: response.message });
+      });
     }
   };
 
