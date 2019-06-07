@@ -34,6 +34,6 @@ react-native run-android
 
 A apk está disponível abaixo para download:
 
-[MyShelfApp](/android/app/app-release.apk)
+[MyShelfApp](/android/app)
 
 Em breve documentação da Aplicação
