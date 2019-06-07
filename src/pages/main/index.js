@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Text, FlatList, StyleSheet, AsyncStorage } from 'react-native';
+import { StackActions, NavigationActions } from 'react-navigation';
 
 import api from '../../services/api';
 
@@ -44,6 +45,10 @@ export default class Main extends Component {
       this.setState({ data });
 
       await AsyncStorage.setItem('@MyShelfAppAPI:books', JSON.stringify(data));
+
+      if(data.books == ""){
+        this.goToBookIndex();
+      }
     };
 
     handleBookListPress = () => {
@@ -54,6 +59,16 @@ export default class Main extends Component {
       await api.delete(`/shelves/${shelf}`, { books: book.id });
       this.loadBooks(shelf);
     };
+
+    goToBookIndex = () => {
+      const resetAction = StackActions.reset({
+        index: 0,
+        actions: [
+          NavigationActions.navigate({ routeName: 'BookIndex' }),
+        ],
+      });
+      this.props.navigation.dispatch(resetAction);
+    }
 
     renderItem = ({ item }) => (
       <BookContainer>
