@@ -18,7 +18,7 @@ npm install
 
 ### A Base de Dados
 
-Para a persistência dos dados, foi criado uma api e hospedada no heroku e disponibilizado neste [repositório](https://github.com/chmr1/myshelf) o código fonte para consulta, o aplicativo já aponta para a api.
+Para a persistência dos dados, foi criado uma api que estar hospedada no heroku, o código fonte foi disponibilizado neste [repositório](https://github.com/chmr1/myshelf) para consulta, o aplicativo já estar apontando para a api.
 
 [Lista de Livros](https://myshelf-chmr1.herokuapp.com/books)
 
